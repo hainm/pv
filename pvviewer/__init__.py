@@ -1,5 +1,16 @@
-import urllib2
+try:
+    from urllib.request import urlopen
+    PY3 = True
+except ImportError:
+    from urllib import urlopen
+    PY3 = False
+
 import uuid
+
+from .viewer import Viewer
+from . import color
+from . import mol
+
 
 base_url = ('http://www.rcsb.org/pdb/download/downloadFile.do'
             '?fileFormat=pdb&structureId=')
@@ -7,8 +18,11 @@ base_url = ('http://www.rcsb.org/pdb/download/downloadFile.do'
 
 class PDBViewer(object):
     def __init__(self, pdb_id):
-        response = urllib2.urlopen(base_url + pdb_id)
-        self.pdb = response.read()
+        response = urlopen(base_url + pdb_id)
+        if not PY3:
+            self.pdb = response.read()
+        else:
+            self.pdb = response.read().decode()
 
     def _repr_html_(self):
         div_id = str(uuid.uuid4())
